@@ -1,8 +1,10 @@
-AFNetworking Nginx HTTPS自签名服务器安全通信
+##AFNetworking Nginx HTTPS自签名服务器安全通信
 
 
 A.对于后台服务器所配置动证书如果是经过CA机构认证颁发的，那么用户用AFNetworking来访问后台接口完全无感觉，就和http一样的方式。
+
 B.但是一个HTTPS的证书如果是知名CA机构认证颁发的，那么就会有问题，AFNetworking默认拒绝和这样的后台服务器通信，因为验证通不过，就和大家网页打开12306网站抢票一样，那个证书也不是经过CA颁发的，而是铁道部自己签名的一个证书。所以，对于中小型初创或是成长型公司来说，买一个https的证书也是需要花费不少费用的。
+
 
 
 AFSecurityPolicy分三种验证模式：
@@ -23,15 +25,18 @@ AFSSLPinningModePublicKey
 
 
 1.生成服务器的KEY和证书签名
+
 openssl genrsa -des3 -out server.key 1024
 openssl req -new -key server.key -out server.csr
 openssl rsa -in server.key -out server_nopwd.key
 openssl x509 -req -days 365 -in server.csr -signkey server_nopwd.key -out server.crt
 
 2.证书格式转换 由于iOS端Apple的API需要der格式证书，故用如下命令转换
+
 openssl x509 -outform der -in server.crt -out client.der
 
 3.nginx配置
+```OC
 server {
     listen 80;#HTTP默认端口80
     server_name tv.diveinedu.com;#主机名,与HTTP请求头域的HOST匹配
@@ -52,8 +57,10 @@ server {
         index index.php index.html;#默认首页
     }
 }
+```OC
 
 4.示例代码
+
 NSString *certFilePath = [[NSBundle mainBundle] pathForResource:@"client" ofType:@"der"];
 NSData *certData = [NSData dataWithContentsOfFile:certFilePath];
 NSSet *certSet = [NSSet setWithObject:certData];
