@@ -31,6 +31,29 @@ openssl x509 -req -days 365 -in server.csr -signkey server_nopwd.key -out server
 2.证书格式转换 由于iOS端Apple的API需要der格式证书，故用如下命令转换
 openssl x509 -outform der -in server.crt -out client.der
 
+3.nginx配置
+server {
+    listen 80;#HTTP默认端口80
+    server_name tv.diveinedu.com;#主机名,与HTTP请求头域的HOST匹配
+    access_log  /var/log/nginx/tv.diveinedu.com.log;#访问日志路径
+    return 301 https://$server_name$request_uri;#强制把所有http访问跳转到https
+}
+
+server {
+    listen 443;#HTTPS默认端口443
+    ssl on;#打开SSL安全Socket
+    ssl_certificate      /usr/local/etc/nginx/server.crt;#证书文件路径
+    ssl_certificate_key  /usr/local/etc/nginx/server_nopwd.key;#私钥文件路径
+
+    #server_name xxx.com;#主机名,与HTTP请求头域的HOST匹配
+    access_log  logs/host.access.log;#访问日志路径
+    location / {
+        root /var/www/;#网站文档根目录
+        index index.php index.html;#默认首页
+    }
+}
+
+4.示例代码
 NSString *certFilePath = [[NSBundle mainBundle] pathForResource:@"client" ofType:@"der"];
 NSData *certData = [NSData dataWithContentsOfFile:certFilePath];
 NSSet *certSet = [NSSet setWithObject:certData];
